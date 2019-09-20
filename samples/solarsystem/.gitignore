@@ -11,3 +11,4 @@ local.properties
 #
 # # OS configurations.
 .DS_Store
+*.sfb
