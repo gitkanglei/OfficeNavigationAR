@@ -27,12 +27,15 @@ import android.view.WindowManager;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.ardog.model.DogPoint;
 import com.ardog.models.ModelLoaderManager;
 import com.ardog.utils.FileUtils;
+import com.ardog.utils.PointUtil;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
+import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
@@ -46,7 +49,9 @@ import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -159,10 +164,35 @@ public class SolarActivity extends AppCompatActivity {
                                     hideLoadingMessage();
                                 }
                             }
+                           // resume();
                         });
 
         // Lastly request CAMERA permission which is required by ARCore.
         DemoUtils.requestCameraPermission(this, RC_PERMISSIONS);
+    }
+
+    /**
+     *
+     *
+     */
+    private void resume(){
+        List<DogPoint> dogPoints = new ArrayList<>();
+        dogPoints.add(new DogPoint());
+        for(DogPoint dogPoint:dogPoints){
+            //String xyz[] = dogPoint.position.split(",");
+//            Anchor anchor1 =  arSceneView.getSession().createAnchor(new Pose(new float[]{Float.parseFloat(xyz[0]),Float.parseFloat(xyz[1]),Float.parseFloat(xyz[2])}
+//            ,new float[]{Float.parseFloat(xyz[0]),Float.parseFloat(xyz[0]),Float.parseFloat(xyz[0])}));
+            Anchor anchor1 =  arSceneView.getSession().createAnchor(new Pose(new float[]{-0.294f, -0.213f, 0.121f}
+                    ,new float[]{0.00f, 0.30f, 0.00f, 0.96f}));
+            createArchor(anchor1);
+        }
+    }
+    private void createArchor(Anchor anchor) {
+        AnchorNode anchorNode = new AnchorNode(anchor);
+        anchorNode.setParent(arSceneView.getScene());
+        Node no =new Node();
+        no.setRenderable(earthRenderable);
+        no.setParent(anchorNode);
     }
 
     private void loadModels() {
