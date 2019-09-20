@@ -15,9 +15,9 @@ import com.google.gson.Gson;
 public class DogPoint {
     public long id;
     //位置点
-    public String position;
+    public float[] position;
     ///旋转点
-    public String rotation;
+    public float[] rotation;
     ////  模型的sdcard路径
     public String filePath;
     //名字
