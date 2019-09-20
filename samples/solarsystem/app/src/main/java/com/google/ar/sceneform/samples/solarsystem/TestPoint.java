@@ -1,21 +1,26 @@
 package com.google.ar.sceneform.samples.solarsystem;
 
-import android.app.Activity;
+import android.Manifest;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+
+import com.ardog.model.DogPoint;
+import com.ardog.utils.PointUtil;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.trinea.android.common.util.FileUtils;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * author: yangbang
  * date: 2019-09-20  18:51
  * fileName: MainActivity
  */
-public class MainActivity extends Activity {
+public class TestPoint extends FragmentActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,11 +49,23 @@ public class MainActivity extends Activity {
 //            Log.i("MainActivity","point: "+json);
 //            List<DogPoint> pointList=PointUtil.json2List(json);
 //            Log.i("MainActivity","size: "+pointList.size());
-            new Thread(()->{
-                PointUtil.save2File(json);
-                String jsonStr=  PointUtil.readFromFile();
-                Log.i("MainActivity","jsonStr: "+jsonStr);
-            }).start();
+            RxPermissions permissions=new RxPermissions(this);
+            permissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)
+                    .observeOn(Schedulers.io())
+                    .subscribe(isGranted->{
+                        if(isGranted){
+                            PointUtil.save2File(json);
+                            String jsonStr=  PointUtil.readFromFile();
+                            Log.i("MainActivity","jsonStr: "+jsonStr);
+                        }
+                    });
+
+//            new Thread(()->{
+//                PointUtil.save2File(json);
+//                String jsonStr=  PointUtil.readFromFile();
+//                Log.i("MainActivity","jsonStr: "+jsonStr);
+//            }).start();
 
 
 //            point.toJsonString();
