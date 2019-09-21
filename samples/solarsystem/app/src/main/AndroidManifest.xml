@@ -66,6 +66,19 @@
         <activity android:name=".SaveActivity" >
         </activity>
         <activity android:name=".SolarActivity"/>
+
+        <activity android:name="com.iflytek.speech.setting.TtsSettings" />
+        <activity android:name="com.iflytek.speech.setting.IatSettings" />
+        <activity
+            android:name="com.iflytek.speech.setting.IseSettings"
+            android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|fontScale"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.iflytek.speech.setting.UrlSettings"
+            android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|fontScale"
+            android:screenOrientation="portrait" >
+        </activity>
         <!-- 移动统计分析 -->
         <meta-data
             android:name="IFLYTEK_APPKEY"

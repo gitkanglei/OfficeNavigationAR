@@ -285,7 +285,6 @@ public class SolarActivity extends AppCompatActivity {
     }
 
     if (arSceneView.getSession() != null) {
-      showLoadingMessage();
       isResumed = true;
     }
   }
@@ -528,20 +527,6 @@ public class SolarActivity extends AppCompatActivity {
     planet.setLocalPosition(new Vector3(auFromParent * AU_TO_METERS, 0.0f, 0.0f));
 
     return planet;
-  }
-
-  private void showLoadingMessage() {
-    if (loadingMessageSnackbar != null && loadingMessageSnackbar.isShownOrQueued()) {
-      return;
-    }
-
-    loadingMessageSnackbar =
-        Snackbar.make(
-            SolarActivity.this.findViewById(android.R.id.content),
-            R.string.plane_finding,
-            Snackbar.LENGTH_INDEFINITE);
-    loadingMessageSnackbar.getView().setBackgroundColor(0xbf323232);
-    loadingMessageSnackbar.show();
   }
 
   private void hideLoadingMessage() {

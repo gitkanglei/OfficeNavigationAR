@@ -89,6 +89,8 @@ class SaveActivity : AppCompatActivity() {
         Log.d("Crease", it.anchor.pose.toString())
       }
       generateVector2()
+      ToastUtils.showShort("保存成功")
+      finish()
     }
 
     iv_line.setOnClickListener {
