@@ -6,7 +6,7 @@ import java.util.*
 
 fun DogPoint.getAdjacentPointList() : List<Long> {
     if (TextUtils.isEmpty(ids)) {
-        return LinkedList<Long>()
+        return LinkedList()
     }
     return ids.split(",".toRegex())
             .dropLastWhile { it.isEmpty() }
