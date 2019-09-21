@@ -3,6 +3,8 @@ package com.ardog.utils;
 import android.os.Environment;
 import android.text.TextUtils;
 
+import com.ardog.extensions.DogPointExtensionKt;
+
 import java.io.File;
 
 public class FileUtils {

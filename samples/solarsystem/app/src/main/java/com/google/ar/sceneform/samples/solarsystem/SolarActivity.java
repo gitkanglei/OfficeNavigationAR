@@ -27,11 +27,11 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 import com.ardog.model.DogPoint;
 import com.ardog.models.ModelLoaderManager;
+import com.ardog.utils.DrawLineHelper;
 import com.ardog.utils.FileUtils;
 import com.ardog.utils.PointUtil;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Frame;
-import com.google.ar.core.GetFrameUtil;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
@@ -49,6 +49,8 @@ import com.google.ar.sceneform.Scene;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
+
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +85,7 @@ public class SolarActivity extends AppCompatActivity {
   // True once the scene has been placed.
   private boolean hasPlacedSolarSystem = false;
   private ModelLoaderManager modelLoaderManager;
+  private boolean isResumed = false;
 
   @Override
   @SuppressWarnings({ "AndroidApiChecker", "FutureReturnValueIgnored" })
@@ -159,14 +162,17 @@ public class SolarActivity extends AppCompatActivity {
     arSceneView.getScene().addOnUpdateListener(
         new Scene.OnUpdateListener() {
           @Override public void onUpdate(FrameTime frameTime) {
-            Frame frame = null;
-            frame = GetFrameUtil.getFrame(arSceneView.getSession());
-
+            Frame frame = arSceneView.getArFrame();
+            if (null == frame){
+              return;
+            }
             if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
               return;
             }
-            resume();
-            arSceneView.getScene().removeOnUpdateListener(this);
+            if (isResumed){
+              resume();
+              isResumed = false;
+            }
           }
         }
     );
@@ -239,6 +245,7 @@ public class SolarActivity extends AppCompatActivity {
 
     if (arSceneView.getSession() != null) {
       showLoadingMessage();
+      isResumed = true;
     }
   }
 
@@ -306,19 +313,24 @@ public class SolarActivity extends AppCompatActivity {
     }
   }
 
+  private List<Anchor>anchors = new ArrayList<>();
   private void resume() {
-    //        if(!isfirst){
-    //            return;
-    //        }
-    //        isfirst = false;
+    DrawLineHelper drawLineHelper = new DrawLineHelper(this,arSceneView);
     List<DogPoint> dogPointList = PointUtil.json2List(PointUtil.readFromFile());
     for (DogPoint dogPoint : dogPointList) {
       Anchor anchor1 =
           arSceneView.getSession().createAnchor(new Pose(dogPoint.position, dogPoint.rotation));
-      //Anchor anchor1 =
-      //    arSceneView.getSession().createAnchor(new Pose(new float[] { -0.294f, -0.213f, 0.121f }
-      //        , new float[] { 0.00f, 0.30f, 0.00f, 0.96f }));
       createArchor(anchor1);
+      anchors.add(anchor1);
+    }
+    for (int i = 0; i < anchors.size(); i++) {
+      int nextpostion = i+1;
+      if(nextpostion == anchors.size()){
+        break;
+      }
+      Anchor dogPoint = anchors.get(i);
+      Anchor nextPoint = anchors.get(nextpostion);
+      drawLineHelper.drawLine(dogPoint,nextPoint);
     }
   }
 
