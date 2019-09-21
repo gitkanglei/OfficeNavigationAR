@@ -27,6 +27,15 @@ public class DogPoint {
     ///临界点ids
     public String ids;
 
+    public DogPoint() {
+    }
+
+    public DogPoint(long id, String name, String ids) {
+        this.id = id;
+        this.name = name;
+        this.ids = ids;
+    }
+
     public String toJsonString() {
         Gson gson = new Gson();
         return gson.toJson(this);
@@ -36,17 +45,20 @@ public class DogPoint {
         Gson gson = new Gson();
         return gson.fromJson(json, DogPoint.class);
     }
-    public Vector3 toPositionVector(){
-        if(position==null || position.length!=3)return Vector3.zero();
-        return new Vector3(position[0],position[1],position[2]);
+
+    public Vector3 toPositionVector() {
+        if (position == null || position.length != 3) return Vector3.zero();
+        return new Vector3(position[0], position[1], position[2]);
     }
-    public Vector3 toRotationVector(){
-        if(rotation==null || rotation.length!=4)return Vector3.zero();
-        return new Vector3(rotation[0],rotation[1],rotation[2]);
+
+    public Vector3 toRotationVector() {
+        if (rotation == null || rotation.length != 4) return Vector3.zero();
+        return new Vector3(rotation[0], rotation[1], rotation[2]);
     }
-    public Quaternion toQuaternion(){
-        if(rotation==null || rotation.length!=4)return new Quaternion(0f,0f,0f,1f);
-        return new Quaternion(rotation[0],rotation[1],rotation[2],rotation[3]);
+
+    public Quaternion toQuaternion() {
+        if (rotation == null || rotation.length != 4) return new Quaternion(0f, 0f, 0f, 1f);
+        return new Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]);
     }
 }
 

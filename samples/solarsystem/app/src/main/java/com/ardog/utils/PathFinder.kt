@@ -2,10 +2,10 @@ package com.ardog.utils
 
 import com.ardog.extensions.getAdjacentPointList
 import com.ardog.model.DogPoint
+import com.google.ar.core.Pose
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath
 import org.jgrapht.graph.DefaultDirectedGraph
 import org.jgrapht.graph.DefaultEdge
-import java.lang.IllegalArgumentException
 
 
 class PathFinder {
@@ -16,7 +16,7 @@ class PathFinder {
 
     lateinit var finder: DijkstraShortestPath<Long, DefaultEdge>
 
-    fun initMap(points: List<DogPoint>) {
+    fun init(points: List<DogPoint>) {
         map = points.map { it.name to it }.toMap()
         this.idMaps = points.map { it.id to it }.toMap()
         this.points = points
@@ -33,10 +33,14 @@ class PathFinder {
         var destinationId = destination.id
         val result = finder.getPath(startId, destinationId);
 
-        return result.vertexList.map { idMaps[it] ?: error("invalid point") }.toList()
+        if (result == null || result.vertexList.isEmpty()){
+            return ArrayList()
+        }
+
+        return result.vertexList.map { idMaps[it]!!}.toList()
     }
 
-    fun findRoutes(startPointName: String, destinationName: String): List<DogPoint> {
+    fun findRoutes(startPointName: String, destinationName: String): List<DogPoint?> {
 
         if (!map.containsKey(startPointName) || !map.containsKey(destinationName)){
             return ArrayList()
@@ -44,14 +48,28 @@ class PathFinder {
         return findRoutes(map[startPointName]!!,map[destinationName]!!)
     }
 
+    fun findNearestPoint(pose : Pose) : DogPoint? {
+        val copyPoints =  points.toList();
+        return copyPoints.minBy { calculateDistance(it, pose) }
+    }
+
+    private fun calculateDistance(point : DogPoint ,pose : Pose) : Float {
+        val x = (point.position[0] - pose.tx()) * (point.position[0] - pose.tx())
+        val y = (point.position[1] - pose.ty()) * (point.position[1] - pose.ty())
+        val z = (point.position[2] - pose.tz()) * (point.position[2] - pose.tz())
+        return x + y + z
+    }
+
     private fun buildGraph() {
         val graph = DefaultDirectedGraph<Long, DefaultEdge>(DefaultEdge::class.java)
 
         points.forEach {
             graph.addVertex(it.id)
+        }
 
-            it.getAdjacentPointList().forEach { that ->
-                graph.addEdge(it.id, that)
+        points.forEach {
+            it.getAdjacentPointList().forEach {that ->
+                graph.addEdge(it.id,that)
             }
         }
 
