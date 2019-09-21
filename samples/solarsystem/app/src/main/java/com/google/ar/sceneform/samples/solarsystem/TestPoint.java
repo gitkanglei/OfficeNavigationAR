@@ -21,6 +21,12 @@ public class TestPoint extends FragmentActivity {
         startActivity(new Intent(TestPoint.this, SaveActivity.class));
       }
     });
+
+    findViewById(R.id.btn_solar).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        startActivity(new Intent(TestPoint.this, SolarActivity.class));
+      }
+    });
     //        findViewById(R.id.btn_click).setOnClickListener((v)->{
     //            DogPoint point=new DogPoint();
     //            point.id=1;

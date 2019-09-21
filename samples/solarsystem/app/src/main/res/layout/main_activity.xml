@@ -8,4 +8,10 @@
         android:id="@+id/btn_click"
         android:text="find"
       />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="solar"
+        android:id="@+id/btn_solar"/>
 </LinearLayout>
