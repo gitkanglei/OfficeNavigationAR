@@ -178,7 +178,7 @@ class SaveActivity : AppCompatActivity() {
       return
     }
 
-    if (endNode >= 0) {
+    if (endNode >= 0 || startNode == pos) {
       return
     }
 

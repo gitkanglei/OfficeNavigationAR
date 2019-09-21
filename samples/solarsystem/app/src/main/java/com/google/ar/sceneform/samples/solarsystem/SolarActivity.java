@@ -497,7 +497,7 @@ public class SolarActivity extends AppCompatActivity {
             FaceToCameraNode faceToCameraNode = new FaceToCameraNode();
             faceToCameraNode.setParent(anchorNode);
             //faceToCameraNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0f, 1f, 0f), 0f));
-            faceToCameraNode.setLocalPosition(new Vector3(0f, 0.1f, 0f));
+            faceToCameraNode.setLocalPosition(new Vector3(0f, 0.2f, 0f));
             faceToCameraNode.setRenderable(viewRenderable);
               View view = viewRenderable.getView();
               TextView tvName = view.findViewById(R.id.tv_name);
