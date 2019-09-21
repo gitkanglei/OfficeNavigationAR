@@ -73,6 +73,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
@@ -438,20 +439,21 @@ public class SolarActivity extends AppCompatActivity {
               return;
             }
 
-            if (null == arSceneView.getSession()) {
-              return;
-            }
-            Pose currentPos = frame.getAndroidSensorPose();
-            DogPoint point = pathFinder.findNearestPoint(currentPos);
-            if (null == point) {
-              return;
-            }
-            resume(point, pathFinder.findPoint(goalName));
-            arSceneView.getScene().removeOnUpdateListener(this);
-          }
-        }
-    );
-  }
+                        if (null == arSceneView.getSession()) {
+                            return;
+                        }
+                        Pose currentPos = frame.getAndroidSensorPose();
+                        DogPoint point = pathFinder.findNearestPoint(currentPos);
+                        if (null == point) {
+                            return;
+                        }
+                        String name = goalName.replace("。", "");
+                        resume(point, pathFinder.findPoint(name));
+                        arSceneView.getScene().removeOnUpdateListener(this);
+                    }
+                }
+        );
+    }
 
   private void resume(DogPoint startPoint, DogPoint endPoint) {
       if (endPoint==null){
@@ -469,7 +471,7 @@ public class SolarActivity extends AppCompatActivity {
       Anchor anchor1 =
           arSceneView.getSession().createAnchor(new Pose(dogPoint.position, dogPoint.rotation));
       boolean isDestination = i == dogPointList.size()-1;
-      createAnchor(anchor1,dogPoint.name,isDestination);
+      createAnchor(anchor1,endPoint.name,isDestination);
       anchors.add(anchor1);
     }
       Log.e("TAG","start line");
@@ -518,6 +520,30 @@ public class SolarActivity extends AppCompatActivity {
                     }
                 });
     }
+    ViewRenderable.builder()
+        .setView(this, R.layout.view_person)
+        .build()
+        .thenAccept(new Consumer<ViewRenderable>() {
+          @Override
+          public void accept(ViewRenderable viewRenderable) {
+            viewRenderable.setShadowCaster(false);
+            FaceToCameraNode faceToCameraNode = new FaceToCameraNode();
+            faceToCameraNode.setParent(anchorNode);
+            //faceToCameraNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0f, 1f, 0f), 0f));
+            faceToCameraNode.setLocalPosition(new Vector3(0f, 0.2f, 0f));
+            faceToCameraNode.setRenderable(viewRenderable);
+            View view = viewRenderable.getView();
+            TextView tvName = view.findViewById(R.id.tv_name);
+            tvName.setText(name);
+            view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    sayHello(tvName.getText().toString());
+                 }
+            });
+
+          }
+        });
   }
     /**
      * 文字转语音

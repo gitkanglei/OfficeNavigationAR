@@ -1,5 +1,6 @@
 package com.ardog.utils
 
+import android.util.Log
 import com.ardog.extensions.getAdjacentPointList
 import com.ardog.model.DogPoint
 import com.google.ar.core.Pose
@@ -58,7 +59,8 @@ class PathFinder {
 
   fun findPoint(name: String): DogPoint? {
    val mapSet= map.entries
-    mapSet.forEach { if (name.contains(it.key)){
+    mapSet.forEach {
+      if (it.key.isNotEmpty() &&name.contains(it.key)){
       return it.value
     } }
     return null
