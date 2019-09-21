@@ -49,7 +49,6 @@ import com.google.ar.sceneform.Scene;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -87,6 +86,7 @@ public class SolarActivity extends AppCompatActivity {
   private boolean hasPlacedSolarSystem = false;
   private ModelLoaderManager modelLoaderManager;
   private boolean isResumed = false;
+  private List<Anchor> anchors = new ArrayList<>();
 
   @Override
   @SuppressWarnings({ "AndroidApiChecker", "FutureReturnValueIgnored" })
@@ -164,22 +164,46 @@ public class SolarActivity extends AppCompatActivity {
         new Scene.OnUpdateListener() {
           @Override public void onUpdate(FrameTime frameTime) {
             Frame frame = arSceneView.getArFrame();
-            if (null == frame){
+            if (null == frame) {
               return;
             }
             if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
               return;
             }
-            if (isResumed){
-              resume();
+            if (isResumed) {
+              //resume();
               isResumed = false;
             }
           }
         }
     );
 
+    arSceneView.getScene().addOnUpdateListener(
+        new Scene.OnUpdateListener() {
+          @Override public void onUpdate(FrameTime frameTime) {
+            Frame frame = arSceneView.getArFrame();
+            if (null == frame) {
+              return;
+            }
+            if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
+              return;
+            }
+
+            if (null == arSceneView.getSession()) {
+              return;
+            }
+            Anchor anchor = arSceneView.getSession().createAnchor(frame.getAndroidSensorPose());
+            onLocationChanged(anchor);
+          }
+        }
+    );
+
     // Lastly request CAMERA permission which is required by ARCore.
     DemoUtils.requestCameraPermission(this, RC_PERMISSIONS);
+  }
+
+  private void onLocationChanged(Anchor currentAnchor) {
+
   }
 
   private void loadModels() {
@@ -320,28 +344,27 @@ public class SolarActivity extends AppCompatActivity {
 ////    }
   }
 
-  private List<Anchor>anchors = new ArrayList<>();
   private void resume() {
-    DrawLineHelper drawLineHelper = new DrawLineHelper(this,arSceneView);
+    DrawLineHelper drawLineHelper = new DrawLineHelper(this, arSceneView);
     List<DogPoint> dogPointList = PointUtil.json2List(PointUtil.readFromFile());
     for (DogPoint dogPoint : dogPointList) {
       Anchor anchor1 =
           arSceneView.getSession().createAnchor(new Pose(dogPoint.position, dogPoint.rotation));
-      createArchor(anchor1);
+      createAnchor(anchor1);
       anchors.add(anchor1);
     }
     for (int i = 0; i < anchors.size(); i++) {
-      int nextpostion = i+1;
-      if(nextpostion == anchors.size()){
+      int nextpostion = i + 1;
+      if (nextpostion == anchors.size()) {
         break;
       }
       Anchor dogPoint = anchors.get(i);
       Anchor nextPoint = anchors.get(nextpostion);
-      drawLineHelper.drawLine(dogPoint,nextPoint);
+      drawLineHelper.drawLine(dogPoint, nextPoint);
     }
   }
 
-  private void createArchor(Anchor anchor) {
+  private void createAnchor(Anchor anchor) {
     AnchorNode anchorNode = new AnchorNode(anchor);
     anchorNode.setParent(arSceneView.getScene());
     Node no = new Node();
