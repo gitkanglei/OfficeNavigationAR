@@ -198,12 +198,12 @@ public class SolarActivity extends AppCompatActivity {
         }
     );
 
-    // Lastly request CAMERA permission which is required by ARCore.
+    // LasøØly request CAMERA permission which is required by ARCore.
     DemoUtils.requestCameraPermission(this, RC_PERMISSIONS);
   }
 
   private void onLocationChanged(Anchor currentAnchor) {
-
+    
   }
 
   private void loadModels() {
