@@ -41,6 +41,11 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
   }
+  sourceSets {
+    main {
+      jniLibs.srcDirs = ['libs']
+    }
+  }
 }
 
 dependencies {
@@ -58,6 +63,7 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation "com.android.support.constraint:constraint-layout:1.1.3"
   implementation 'com.android.support:multidex:1.0.2'
+  implementation files('libs/Msc.jar')
 }
 
 apply plugin: 'com.google.ar.sceneform.plugin'
