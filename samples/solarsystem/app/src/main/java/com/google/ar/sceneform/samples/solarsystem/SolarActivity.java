@@ -305,12 +305,12 @@ public class SolarActivity extends AppCompatActivity {
       return;
     }
 
-    Frame frame = arSceneView.getArFrame();
-    if (frame != null) {
-      if (!hasPlacedSolarSystem && tryPlaceSolarSystem(tap, frame)) {
-        hasPlacedSolarSystem = true;
-      }
-    }
+//    Frame frame = arSceneView.getArFrame();
+////    if (frame != null) {
+////      if (!hasPlacedSolarSystem && tryPlaceSolarSystem(tap, frame)) {
+////        hasPlacedSolarSystem = true;
+////      }
+////    }
   }
 
   private List<Anchor>anchors = new ArrayList<>();

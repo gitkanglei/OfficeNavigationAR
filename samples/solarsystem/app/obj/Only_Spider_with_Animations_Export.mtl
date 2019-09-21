@@ -1,0 +1,13 @@
+# Blender MTL File: 'Only_Spider_with_Animations_Export.blend'
+# Material Count: 6
+
+newmtl Spider
+Ns 37.254902
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.400000 0.400000 0.400000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd textures\Spinnen_Bein_tex.jpg
