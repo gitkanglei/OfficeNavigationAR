@@ -1,9 +1,12 @@
 package com.google.ar.sceneform.samples.solarsystem
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.KeyEvent
+import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
 import com.ardog.model.DogPoint
@@ -22,7 +25,10 @@ import com.google.ar.sceneform.ux.BaseArFragment.OnTapArPlaneListener
 import kotlinx.android.synthetic.main.activity_save.UI_ArSceneView
 import kotlinx.android.synthetic.main.activity_save.UI_Last
 import kotlinx.android.synthetic.main.activity_save.UI_Post
+import kotlinx.android.synthetic.main.activity_save.et_name
 import kotlinx.android.synthetic.main.activity_save.iv_line
+import android.content.Context.INPUT_METHOD_SERVICE
+import android.view.inputmethod.InputMethodManager
 
 class SaveActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,38 +39,65 @@ class SaveActivity : AppCompatActivity() {
     )// 设置全屏
     setContentView(R.layout.activity_save)
     initView()
+
+  }
+
+  private fun initEdit(pos: Int) {
+    et_name.visibility = View.VISIBLE
+    et_name.setOnKeyListener { v, keyCode, event ->
+      if (KeyEvent.KEYCODE_ENTER == keyCode && KeyEvent.ACTION_DOWN == event.action) {
+        val string = et_name.text.toString()
+        dataArray[pos].dataText = string
+        et_name.setText("")
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(et_name, InputMethodManager.SHOW_FORCED)
+
+        imm.hideSoftInputFromWindow(et_name.windowToken, 0)
+        et_name.visibility = View.GONE
+        return@setOnKeyListener true
+      }
+      false
+    }
   }
 
   private fun initView() {
     UI_Last.setOnClickListener {
-      //上一步
-      when (dataArray.size) {
-        0 -> {
-          ToastUtils.showLong("没有操作记录")
+      if (isInitListener) {
+        //上一步
+        when (dataArray.size) {
+          0 -> {
+            ToastUtils.showLong("没有操作记录")
+          }
+          else -> {
+            dataArray.remove(dataArray.last())
+            (UI_ArSceneView as MyArFragment).arSceneView.scene.removeChild(
+                startNodeArray
+                    .removeAt(startNodeArray.size - 1)
+            )
+            count--
+          }
         }
-        else -> {
-          dataArray.remove(dataArray.last())
-          (UI_ArSceneView as MyArFragment).arSceneView.scene.removeChild(
-              startNodeArray
-                  .removeAt(startNodeArray.size - 1)
-          )
-          count--
-        }
+      } else {
+        lineArray.remove(lineArray.last())
+        val last = lineNodeArray.removeAt(lineNodeArray.size - 1)
+        last.parent!!.removeChild(last)
       }
     }
 
     UI_Post.setOnClickListener {
       dataArray.forEach {
         Log.d("Crease", it.anchor.pose.toString())
-        generateVector2()
       }
+      generateVector2()
     }
 
     iv_line.setOnClickListener {
       if (isInitListener) {
         (UI_ArSceneView as MyArFragment).setOnTapArPlaneListener(null)
+        iv_line.setImageResource(R.drawable.ic_clear_black_24dp)
       } else {
         (UI_ArSceneView as MyArFragment).setOnTapArPlaneListener(listener)
+        iv_line.setImageResource(R.drawable.ic_call_missed_outgoing_black_24dp)
       }
       isInitListener = false
     }
@@ -134,6 +167,11 @@ class SaveActivity : AppCompatActivity() {
   private var endNode: Int = -1
 
   private fun drawLine(pos: Int) {
+    if (isInitListener) {
+      initEdit(pos)
+      return
+    }
+
     if (startNode < 0) {
       startNode = pos
       return
@@ -165,11 +203,11 @@ class SaveActivity : AppCompatActivity() {
             worldPosition = Vector3.add(firstWorldPosition, secondWorldPosition)
                 .scaled(0.5f)
             worldRotation = rotationFromAToB
+
+            lineArray.add(LineStore(startNode, endNode))
           })
 
         }
-
-    lineArray.add(LineStore(startNode, endNode))
     startNode = -1
     endNode = -1
 
@@ -177,7 +215,7 @@ class SaveActivity : AppCompatActivity() {
 
   private fun generateVector2() {
     val total = dataArray.size
-    val array = Array<Array<Int>>(
+    val array = Array(
         total
     ) { index ->
       Array(total) {
@@ -193,41 +231,13 @@ class SaveActivity : AppCompatActivity() {
       array[lineStore.startPos][lineStore.endPos] = 1
       array[lineStore.endPos][lineStore.startPos] = 1
     }
-//    for (i in 0 until height) {
-//      for (j in 0 until width) {
-//
-//        val currentPos = i * width + j
-//        val previousPos = currentPos - 1
-//        val nextPos = currentPos + 1
-//        array[currentPos][currentPos] = 0
-//
-//        if (previousPos >= 0) {
-//          array[currentPos][previousPos] = 1
-//        }
-//
-//        if (nextPos < total) {
-//          array[currentPos][nextPos] = 1
-//        }
-//
-//        val previousLinePos = currentPos - 2 * j - 1
-//
-//        val nextLinePos = previousLinePos + width * 2
-//
-//        if (previousLinePos >= 0) {
-//          array[currentPos][previousLinePos] = 1
-//        }
-//
-//        if (nextLinePos < total) {
-//          array[currentPos][nextLinePos] = 1
-//        }
-//      }
-//    }
 
     val dogPoints = mutableListOf<DogPoint>()
     for (i in 0 until total) {
       val anchorInfoBean = dataArray[i]
       val dogPoint = DogPoint()
       dogPoint.id = i.toLong()
+      dogPoint.name = anchorInfoBean.dataText
       val pose = anchorInfoBean.anchor.pose
       dogPoint.position = floatArrayOf(pose.tx(), pose.ty(), pose.tz())
       val ids = mutableListOf<Int>()
