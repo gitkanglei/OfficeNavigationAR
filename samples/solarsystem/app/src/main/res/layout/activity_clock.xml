@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="400dp"
+    android:layout_height="400dp"
+    android:orientation="vertical"
+   >
+
+<com.ardog.view.ClockView
+    android:id="@+id/clock"
+    android:layout_width="400dp"
+    android:layout_height="400dp"/>
+</LinearLayout>
