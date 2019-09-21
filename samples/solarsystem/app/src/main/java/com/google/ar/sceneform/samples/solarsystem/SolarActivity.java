@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -514,11 +515,16 @@ public class SolarActivity extends AppCompatActivity {
                         faceToCameraNode.setRenderable(viewRenderable);
                         View view = viewRenderable.getView();
                         TextView tvName = view.findViewById(R.id.tv_name);
-                        tvName.setText(name);
+                        if (!TextUtils.isEmpty(tvName.getText().toString())){
+                            tvName.setText("今天请假不在公司");
+                        }
                         view.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                sayHello(tvName.getText().toString());
+                                if (TextUtils.isEmpty(tvName.getText().toString())){
+                                    return;
+                                }
+                                sayHello("姓名张红川部分技术部");
                             }
                         });
                     }
