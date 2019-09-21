@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -468,7 +469,7 @@ public class SolarActivity extends AppCompatActivity {
       Anchor anchor1 =
           arSceneView.getSession().createAnchor(new Pose(dogPoint.position, dogPoint.rotation));
       boolean isDestination = i == dogPointList.size()-1;
-      createAnchor(anchor1,dogPoint.name,isDestination);
+      createAnchor(anchor1,endPoint.name,isDestination);
       anchors.add(anchor1);
     }
     for (int i = 0; i < anchors.size(); i++) {
@@ -501,15 +502,16 @@ public class SolarActivity extends AppCompatActivity {
             //faceToCameraNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0f, 1f, 0f), 0f));
             faceToCameraNode.setLocalPosition(new Vector3(0f, 0.2f, 0f));
             faceToCameraNode.setRenderable(viewRenderable);
-              View view = viewRenderable.getView();
-              TextView tvName = view.findViewById(R.id.tv_name);
-              tvName.setText(name);
-              view.setOnClickListener(new View.OnClickListener() {
-                  @Override
-                  public void onClick(View v) {
-                      sayHello(tvName.getText().toString());
-                  }
-              });
+            View view = viewRenderable.getView();
+            TextView tvName = view.findViewById(R.id.tv_name);
+            tvName.setText(name);
+            view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    sayHello(tvName.getText().toString());
+                 }
+            });
+
           }
         });
   }
