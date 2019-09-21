@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import com.ardog.model.DogPoint
 import com.ardog.utils.PointUtil
@@ -27,8 +28,6 @@ import kotlinx.android.synthetic.main.activity_save.UI_Last
 import kotlinx.android.synthetic.main.activity_save.UI_Post
 import kotlinx.android.synthetic.main.activity_save.et_name
 import kotlinx.android.synthetic.main.activity_save.iv_line
-import android.content.Context.INPUT_METHOD_SERVICE
-import android.view.inputmethod.InputMethodManager
 
 class SaveActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -101,7 +100,7 @@ class SaveActivity : AppCompatActivity() {
         (UI_ArSceneView as MyArFragment).setOnTapArPlaneListener(listener)
         iv_line.setImageResource(R.drawable.ic_call_missed_outgoing_black_24dp)
       }
-      isInitListener = false
+      isInitListener = !isInitListener
     }
 
     initAr()
