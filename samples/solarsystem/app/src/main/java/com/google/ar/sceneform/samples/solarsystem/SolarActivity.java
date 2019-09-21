@@ -386,7 +386,7 @@ public class SolarActivity extends AppCompatActivity {
     for (DogPoint dogPoint : dogPointList) {
       Anchor anchor1 =
           arSceneView.getSession().createAnchor(new Pose(dogPoint.position, dogPoint.rotation));
-      createAnchor(anchor1);
+      createAnchor(anchor1,dogPoint.name);
       anchors.add(anchor1);
     }
     for (int i = 0; i < anchors.size(); i++) {
@@ -400,7 +400,7 @@ public class SolarActivity extends AppCompatActivity {
     }
   }
 
-  private void createAnchor(Anchor anchor) {
+  private void createAnchor(Anchor anchor,String name) {
     AnchorNode anchorNode = new AnchorNode(anchor);
     anchorNode.setParent(arSceneView.getScene());
     Node no = new Node();
@@ -421,6 +421,7 @@ public class SolarActivity extends AppCompatActivity {
             faceToCameraNode.setRenderable(viewRenderable);
               View view = viewRenderable.getView();
               TextView tvName = view.findViewById(R.id.tv_name);
+              tvName.setText(name);
               view.setOnClickListener(new View.OnClickListener() {
                   @Override
                   public void onClick(View v) {
