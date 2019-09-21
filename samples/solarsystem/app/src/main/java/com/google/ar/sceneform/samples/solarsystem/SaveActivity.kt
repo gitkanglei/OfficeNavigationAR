@@ -18,9 +18,11 @@ import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.MaterialFactory
 import com.google.ar.sceneform.rendering.ShapeFactory
 import com.google.ar.sceneform.rendering.ViewRenderable
+import com.google.ar.sceneform.ux.BaseArFragment.OnTapArPlaneListener
 import kotlinx.android.synthetic.main.activity_save.UI_ArSceneView
 import kotlinx.android.synthetic.main.activity_save.UI_Last
 import kotlinx.android.synthetic.main.activity_save.UI_Post
+import kotlinx.android.synthetic.main.activity_save.iv_line
 
 class SaveActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,23 +59,36 @@ class SaveActivity : AppCompatActivity() {
         generateVector2()
       }
     }
+
+    iv_line.setOnClickListener {
+      if (isInitListener) {
+        (UI_ArSceneView as MyArFragment).setOnTapArPlaneListener(null)
+      } else {
+        (UI_ArSceneView as MyArFragment).setOnTapArPlaneListener(listener)
+      }
+      isInitListener = false
+    }
+
     initAr()
   }
 
+  private var isInitListener = false
   private val dataArray = arrayListOf<AnchorInfoBean>()
   private val lineArray = arrayListOf<LineStore>()
   private val sphereNodeArray = arrayListOf<Node>()
   private val lineNodeArray = arrayListOf<Node>()
   private val startNodeArray = arrayListOf<AnchorNode>()
+  private val listener = OnTapArPlaneListener { hitResult, plane, motionEvent ->
+    val anchorInfoBean = AnchorInfoBean("", hitResult.createAnchor(), 0.0)
+    dataArray.add(anchorInfoBean)
+
+    drawPoint(anchorInfoBean.anchor)
+  }
 
   @SuppressLint("NewApi")
   private fun initAr() {
-    (UI_ArSceneView as MyArFragment).setOnTapArPlaneListener { hitResult, plane, motionEvent ->
-      val anchorInfoBean = AnchorInfoBean("", hitResult.createAnchor(), 0.0)
-      dataArray.add(anchorInfoBean)
-
-      drawPoint(anchorInfoBean.anchor)
-    }
+    isInitListener = true
+    (UI_ArSceneView as MyArFragment).setOnTapArPlaneListener(listener)
   }
 
   private var count = 0
@@ -88,7 +103,7 @@ class SaveActivity : AppCompatActivity() {
         this@SaveActivity, com.google.ar.sceneform.rendering.Color(0.33f, 0.87f, 0f)
     )
         .thenAccept { material ->
-          val sphere = ShapeFactory.makeSphere(0.02f, Vector3.zero(), material)
+          val sphere = ShapeFactory.makeSphere(0.1f, Vector3.zero(), material)
           sphereNodeArray.add(Node().apply {
             setParent(node)
             localPosition = Vector3.zero()
@@ -109,7 +124,7 @@ class SaveActivity : AppCompatActivity() {
           FaceToCameraNode().apply {
             setParent(node)
             localRotation = Quaternion.axisAngle(Vector3(0f, 1f, 0f), 90f)
-            localPosition = Vector3(0f, 0.02f, 0f)
+            localPosition = Vector3(0f, 0.1f, 0f)
             renderable = it
           }
         }
