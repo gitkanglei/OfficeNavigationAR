@@ -520,30 +520,6 @@ public class SolarActivity extends AppCompatActivity {
                     }
                 });
     }
-    ViewRenderable.builder()
-        .setView(this, R.layout.view_person)
-        .build()
-        .thenAccept(new Consumer<ViewRenderable>() {
-          @Override
-          public void accept(ViewRenderable viewRenderable) {
-            viewRenderable.setShadowCaster(false);
-            FaceToCameraNode faceToCameraNode = new FaceToCameraNode();
-            faceToCameraNode.setParent(anchorNode);
-            //faceToCameraNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0f, 1f, 0f), 0f));
-            faceToCameraNode.setLocalPosition(new Vector3(0f, 0.2f, 0f));
-            faceToCameraNode.setRenderable(viewRenderable);
-            View view = viewRenderable.getView();
-            TextView tvName = view.findViewById(R.id.tv_name);
-            tvName.setText(name);
-            view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                    sayHello(tvName.getText().toString());
-                 }
-            });
-
-          }
-        });
   }
     /**
      * 文字转语音
