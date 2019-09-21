@@ -31,7 +31,6 @@ import com.ardog.utils.FileUtils;
 import com.ardog.utils.PointUtil;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Frame;
-import com.google.ar.core.GetFrameUtil;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
@@ -156,21 +155,6 @@ public class SolarActivity extends AppCompatActivity {
               }
             });
 
-    arSceneView.getScene().addOnUpdateListener(
-        new Scene.OnUpdateListener() {
-          @Override public void onUpdate(FrameTime frameTime) {
-            Frame frame = null;
-            frame = GetFrameUtil.getFrame(arSceneView.getSession());
-
-            if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
-              return;
-            }
-            resume();
-            arSceneView.getScene().removeOnUpdateListener(this);
-          }
-        }
-    );
-
     // Lastly request CAMERA permission which is required by ARCore.
     DemoUtils.requestCameraPermission(this, RC_PERMISSIONS);
   }
@@ -239,6 +223,22 @@ public class SolarActivity extends AppCompatActivity {
 
     if (arSceneView.getSession() != null) {
       showLoadingMessage();
+
+      arSceneView.getScene().addOnUpdateListener(
+          new Scene.OnUpdateListener() {
+            @Override public void onUpdate(FrameTime frameTime) {
+              Frame frame = arSceneView.getArFrame();
+              if (null == frame){
+                return;
+              }
+              if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
+                return;
+              }
+              resume();
+              arSceneView.getScene().removeOnUpdateListener(this);
+            }
+          }
+      );
     }
   }
 
