@@ -256,7 +256,7 @@ class SaveActivity : AppCompatActivity() {
   }
 
   override fun onDestroy() {
-    super.onDestroy()
     (UI_ArSceneView as MyArFragment).onDestroy()
+    super.onDestroy()
   }
 }
