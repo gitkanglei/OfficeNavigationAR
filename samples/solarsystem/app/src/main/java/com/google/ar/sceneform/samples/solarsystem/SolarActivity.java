@@ -85,6 +85,7 @@ public class SolarActivity extends AppCompatActivity {
   // True once the scene has been placed.
   private boolean hasPlacedSolarSystem = false;
   private ModelLoaderManager modelLoaderManager;
+  private boolean isResumed = false;
 
   @Override
   @SuppressWarnings({ "AndroidApiChecker", "FutureReturnValueIgnored" })
@@ -158,6 +159,24 @@ public class SolarActivity extends AppCompatActivity {
               }
             });
 
+    arSceneView.getScene().addOnUpdateListener(
+        new Scene.OnUpdateListener() {
+          @Override public void onUpdate(FrameTime frameTime) {
+            Frame frame = arSceneView.getArFrame();
+            if (null == frame){
+              return;
+            }
+            if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
+              return;
+            }
+            if (isResumed){
+              resume();
+              isResumed = false;
+            }
+          }
+        }
+    );
+
     // Lastly request CAMERA permission which is required by ARCore.
     DemoUtils.requestCameraPermission(this, RC_PERMISSIONS);
   }
@@ -226,22 +245,7 @@ public class SolarActivity extends AppCompatActivity {
 
     if (arSceneView.getSession() != null) {
       showLoadingMessage();
-
-      arSceneView.getScene().addOnUpdateListener(
-          new Scene.OnUpdateListener() {
-            @Override public void onUpdate(FrameTime frameTime) {
-              Frame frame = arSceneView.getArFrame();
-              if (null == frame){
-                return;
-              }
-              if (frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
-                return;
-              }
-              resume();
-              arSceneView.getScene().removeOnUpdateListener(this);
-            }
-          }
-      );
+      isResumed = true;
     }
   }
 

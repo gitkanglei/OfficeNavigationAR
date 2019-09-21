@@ -23,6 +23,16 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
+        android:id="@+id/iv_line"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_call_missed_outgoing_black_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <ImageView
         android:src="@drawable/ar_post"
         android:id="@+id/UI_Post"
         android:layout_width="48dp"
