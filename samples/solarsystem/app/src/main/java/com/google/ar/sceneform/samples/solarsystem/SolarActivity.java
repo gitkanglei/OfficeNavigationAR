@@ -80,6 +80,7 @@ public class SolarActivity extends AppCompatActivity {
   private ModelRenderable uranusRenderable;
   private ModelRenderable neptuneRenderable;
   private ViewRenderable solarControlsRenderable;
+  private ViewRenderable personRender;
   // True once scene is loaded
   private boolean hasFinishedLoading = false;
   // True once the scene has been placed.
@@ -191,8 +192,12 @@ public class SolarActivity extends AppCompatActivity {
     // Build a renderable from a 2D View.
     CompletableFuture<ViewRenderable> solarControlsStage =
         ViewRenderable.builder().setView(this, R.layout.solar_controls).build();
+    CompletableFuture<ViewRenderable> personFuture =
+        ViewRenderable.builder().setView(this, R.layout.view_person).build();
     Map<String, CompletableFuture<ViewRenderable>> extraRenderable = new LinkedHashMap<>();
     extraRenderable.put("solar", solarControlsStage);
+    extraRenderable.put("person", personFuture);
+
     modelLoaderManager = new ModelLoaderManager(this);
     modelLoaderManager.loadModelRenderablesFromDirectory(FileUtils.getARPath(), arrays,
         extraRenderable, maps -> {
@@ -207,10 +212,12 @@ public class SolarActivity extends AppCompatActivity {
           uranusRenderable = (ModelRenderable) maps.get("Uranus.sfb");
           neptuneRenderable = (ModelRenderable) maps.get("Neptune.sfb");
           solarControlsRenderable = solarControlsStage.get();
+
           // Everything finished loading successfully.
           hasFinishedLoading = true;
         });
   }
+
 
   @Override
   protected void onResume() {
@@ -442,7 +449,18 @@ public class SolarActivity extends AppCompatActivity {
 
     return base;
   }
-
+  private Node createNode(ViewRenderable viewRender,DogPoint point){
+    Node node=new Node();
+    node.setRenderable(viewRender);
+    node.setLocalPosition(point.toPositionVector());
+    node.setLocalRotation(point.toQuaternion());
+    return node;
+  }
+  private CompletableFuture<ViewRenderable>  createFuture(int id){
+    CompletableFuture<ViewRenderable> solarControlsStage =
+            ViewRenderable.builder().setView(this,id).build();
+    return solarControlsStage;
+  }
   private Node createPlanet(
       String name,
       Node parent,
