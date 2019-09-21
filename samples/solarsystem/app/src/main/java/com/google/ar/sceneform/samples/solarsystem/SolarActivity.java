@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -86,6 +87,7 @@ public class SolarActivity extends AppCompatActivity {
   private ArSceneView arSceneView;
   private ModelRenderable earthRenderable;
   private ModelRenderable manRenderable;
+  private ModelRenderable senceRenderable;
   private boolean hasPlacedSolarSystem = false;
   private List<Anchor> anchors = new ArrayList<>();
   private PathFinder pathFinder;
@@ -323,7 +325,7 @@ public class SolarActivity extends AppCompatActivity {
         "Sol.sfb", "Mercury.sfb", "Venus.sfb",
         "Earth.sfb", "Luna.sfb", "Mars.sfb",
         "Jupiter.sfb", "Saturn.sfb", "Uranus.sfb",
-        "Neptune.sfb","man.sfb"
+        "Neptune.sfb","man.sfb","scene.sfb"
     };
     // Build a renderable from a 2D View.
     CompletableFuture<ViewRenderable> solarControlsStage =
@@ -339,6 +341,7 @@ public class SolarActivity extends AppCompatActivity {
         extraRenderable, maps -> {
           earthRenderable = (ModelRenderable) maps.get("Earth.sfb");
                 manRenderable = (ModelRenderable) maps.get("man.sfb");
+                senceRenderable = (ModelRenderable) maps.get("scene.sfb");
             });
   }
 
@@ -469,15 +472,18 @@ public class SolarActivity extends AppCompatActivity {
       createAnchor(anchor1,dogPoint.name,isDestination);
       anchors.add(anchor1);
     }
+      Log.e("TAG","start line");
     for (int i = 0; i < anchors.size(); i++) {
       int nextpostion = i + 1;
       if (nextpostion == anchors.size()) {
         break;
       }
+        Log.e("TAG","draw line"+i);
       Anchor dogPoint = anchors.get(i);
       Anchor nextPoint = anchors.get(nextpostion);
       drawLineHelper.drawLine(dogPoint, nextPoint);
     }
+      Log.e("TAG","end line");
   }
 
   private void createAnchor(Anchor anchor,String name,boolean isDestation) {
@@ -485,31 +491,33 @@ public class SolarActivity extends AppCompatActivity {
     anchorNode.setParent(arSceneView.getScene());
     Node no = new Node();
     no.setLocalScale(new Vector3(0.1f, 0.1f, 0.1f));
-    no.setRenderable(isDestation?manRenderable:earthRenderable);
+    no.setRenderable(isDestation?senceRenderable:earthRenderable);
     no.setParent(anchorNode);
-    ViewRenderable.builder()
-        .setView(this, R.layout.view_person)
-        .build()
-        .thenAccept(new Consumer<ViewRenderable>() {
-          @Override
-          public void accept(ViewRenderable viewRenderable) {
-            viewRenderable.setShadowCaster(false);
-            FaceToCameraNode faceToCameraNode = new FaceToCameraNode();
-            faceToCameraNode.setParent(anchorNode);
-            //faceToCameraNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0f, 1f, 0f), 0f));
-            faceToCameraNode.setLocalPosition(new Vector3(0f, 0.2f, 0f));
-            faceToCameraNode.setRenderable(viewRenderable);
-              View view = viewRenderable.getView();
-              TextView tvName = view.findViewById(R.id.tv_name);
-              tvName.setText(name);
-              view.setOnClickListener(new View.OnClickListener() {
-                  @Override
-                  public void onClick(View v) {
-                      sayHello(tvName.getText().toString());
-                  }
-              });
-          }
-        });
+    if(isDestation){
+        ViewRenderable.builder()
+                .setView(this, R.layout.view_person)
+                .build()
+                .thenAccept(new Consumer<ViewRenderable>() {
+                    @Override
+                    public void accept(ViewRenderable viewRenderable) {
+                        viewRenderable.setShadowCaster(false);
+                        FaceToCameraNode faceToCameraNode = new FaceToCameraNode();
+                        faceToCameraNode.setParent(anchorNode);
+                        //faceToCameraNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0f, 1f, 0f), 0f));
+                        faceToCameraNode.setLocalPosition(new Vector3(0f, 0.2f, 0f));
+                        faceToCameraNode.setRenderable(viewRenderable);
+                        View view = viewRenderable.getView();
+                        TextView tvName = view.findViewById(R.id.tv_name);
+                        tvName.setText(name);
+                        view.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                sayHello(tvName.getText().toString());
+                            }
+                        });
+                    }
+                });
+    }
   }
     /**
      * 文字转语音
