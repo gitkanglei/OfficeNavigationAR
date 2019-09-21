@@ -475,6 +475,7 @@ public class SolarActivity extends AppCompatActivity {
       anchors.add(anchor1);
     }
       Log.e("TAG","start line");
+
     for (int i = 0; i < anchors.size(); i++) {
       int nextpostion = i + 1;
       if (nextpostion == anchors.size()) {
@@ -495,6 +496,9 @@ public class SolarActivity extends AppCompatActivity {
     no.setLocalScale(new Vector3(0.1f, 0.1f, 0.1f));
     no.setRenderable(isDestation?senceRenderable:earthRenderable);
     no.setParent(anchorNode);
+    if(no.getParent()!=null){
+        no.getParent().removeChild(no);
+    }
     if(isDestation){
         ViewRenderable.builder()
                 .setView(this, R.layout.view_person)
