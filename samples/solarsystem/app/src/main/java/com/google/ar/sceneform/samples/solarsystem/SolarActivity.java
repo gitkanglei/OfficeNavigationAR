@@ -90,6 +90,7 @@ public class SolarActivity extends AppCompatActivity {
   private Snackbar loadingMessageSnackbar = null;
   private ArSceneView arSceneView;
   private ModelRenderable earthRenderable;
+  private ModelRenderable manRenderable;
   private boolean hasPlacedSolarSystem = false;
   private List<Anchor> anchors = new ArrayList<>();
   private PathFinder pathFinder;
@@ -249,7 +250,7 @@ public class SolarActivity extends AppCompatActivity {
         "Sol.sfb", "Mercury.sfb", "Venus.sfb",
         "Earth.sfb", "Luna.sfb", "Mars.sfb",
         "Jupiter.sfb", "Saturn.sfb", "Uranus.sfb",
-        "Neptune.sfb"
+        "Neptune.sfb","man.sfb"
     };
     // Build a renderable from a 2D View.
     CompletableFuture<ViewRenderable> solarControlsStage =
@@ -264,7 +265,8 @@ public class SolarActivity extends AppCompatActivity {
     modelLoaderManager.loadModelRenderablesFromDirectory(FileUtils.getARPath(), arrays,
         extraRenderable, maps -> {
           earthRenderable = (ModelRenderable) maps.get("Earth.sfb");
-        });
+                manRenderable = (ModelRenderable) maps.get("man.sfb");
+            });
   }
 
   @Override
@@ -383,10 +385,12 @@ public class SolarActivity extends AppCompatActivity {
       ToastUtils.showShort("两点之间不可达");
       return;
     }
-    for (DogPoint dogPoint : dogPointList) {
+    for (int i =0 ; i<dogPointList.size() ; i++) {
+        DogPoint dogPoint = dogPointList.get(i);
       Anchor anchor1 =
           arSceneView.getSession().createAnchor(new Pose(dogPoint.position, dogPoint.rotation));
-      createAnchor(anchor1,dogPoint.name);
+      boolean isDestination = i == dogPointList.size()-1;
+      createAnchor(anchor1,dogPoint.name,isDestination);
       anchors.add(anchor1);
     }
     for (int i = 0; i < anchors.size(); i++) {
@@ -400,12 +404,12 @@ public class SolarActivity extends AppCompatActivity {
     }
   }
 
-  private void createAnchor(Anchor anchor,String name) {
+  private void createAnchor(Anchor anchor,String name,boolean isDestation) {
     AnchorNode anchorNode = new AnchorNode(anchor);
     anchorNode.setParent(arSceneView.getScene());
     Node no = new Node();
     no.setLocalScale(new Vector3(0.1f, 0.1f, 0.1f));
-    no.setRenderable(earthRenderable);
+    no.setRenderable(isDestation?manRenderable:earthRenderable);
     no.setParent(anchorNode);
     ViewRenderable.builder()
         .setView(this, R.layout.view_person)
