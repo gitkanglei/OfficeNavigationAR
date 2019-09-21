@@ -57,7 +57,11 @@ class PathFinder {
   }
 
   fun findPoint(name: String): DogPoint? {
-    return map[name]
+   val mapSet= map.entries
+    mapSet.forEach { if (name.contains(it.key)){
+      return it.value
+    } }
+    return null
   }
 
   fun findNearestPoint(pose: Pose): DogPoint? {

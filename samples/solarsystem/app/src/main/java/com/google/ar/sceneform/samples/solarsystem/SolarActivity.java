@@ -15,26 +15,15 @@
  */
 package com.google.ar.sceneform.samples.solarsystem;
 
-import android.content.Context;
-import android.graphics.Color;
+import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.BackgroundColorSpan;
-import android.util.Log;
-import android.view.GestureDetector;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.EditText;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,18 +36,15 @@ import com.ardog.utils.PointUtil;
 import com.blankj.utilcode.util.ToastUtils;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Frame;
-import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
-import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.exceptions.CameraNotAvailableException;
 import com.google.ar.core.exceptions.UnavailableException;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.ArSceneView;
 import com.google.ar.sceneform.FrameTime;
-import com.google.ar.sceneform.HitTestResult;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.Scene;
 import com.google.ar.sceneform.math.Vector3;
@@ -66,17 +52,26 @@ import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
+import com.iflytek.cloud.RecognizerResult;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.SpeechRecognizer;
 import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SynthesizerListener;
+import com.iflytek.cloud.ui.RecognizerDialog;
+import com.iflytek.cloud.ui.RecognizerDialogListener;
+import com.iflytek.speech.setting.IatSettings;
+import com.iflytek.speech.util.JsonParser;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
@@ -99,10 +94,21 @@ public class SolarActivity extends AppCompatActivity {
     private SpeechSynthesizer mTts;
     // 引擎类型
     private String mEngineType = SpeechConstant.TYPE_CLOUD;
+    // 语音听写对象
+    private SpeechRecognizer mIat;
+    // 语音听写UI
+    private RecognizerDialog mIatDialog;
+    private String resultType = "json";
+    private boolean mTranslateEnable = false;
+    private boolean cyclic = false;//音频流识别是否循环调用
+    private StringBuffer buffer = new StringBuffer();
+    // 用HashMap存储听写结果
+    private HashMap<String, String> mIatResults = new LinkedHashMap<String, String>();
+    private SharedPreferences mSharedPreferences;
     /**
      * 初始化监听。
      */
-    private InitListener mTtsInitListener = new InitListener() {
+    private InitListener mInitTipsListener = new InitListener() {
         @Override
         public void onInit(int code) {
             if (code != ErrorCode.SUCCESS) {
@@ -114,6 +120,20 @@ public class SolarActivity extends AppCompatActivity {
             }
         }
     };
+
+    /**
+     * 初始化监听器。
+     */
+    private InitListener mInitListener = new InitListener() {
+
+        @Override
+        public void onInit(int code) {
+            if (code != ErrorCode.SUCCESS) {
+                ToastUtils.showShort("初始化失败,错误码：" + code);
+            }
+        }
+    };
+
     /**
      * 合成回调监听。
      */
@@ -159,6 +179,33 @@ public class SolarActivity extends AppCompatActivity {
 					}*/
 
         }
+    };
+
+    /**
+     * 听写UI监听器
+     */
+    private RecognizerDialogListener mRecognizerDialogListener = new RecognizerDialogListener() {
+        @Override
+        public void onResult(RecognizerResult results, boolean isLast) {
+            if( mTranslateEnable ){
+            //翻译过来的
+            }else{
+                printResult(results);
+            }
+        }
+
+        /**
+         * 识别回调错误.
+         */
+        @Override
+        public void onError(SpeechError error) {
+            if(mTranslateEnable && error.getErrorCode() == 14002) {
+                ToastUtils.showShort( error.getPlainDescription(true)+"\n请确认是否已开通翻译功能" );
+            } else {
+                ToastUtils.showShort(error.getPlainDescription(true));
+            }
+        }
+
     };
 
   @Override
@@ -225,25 +272,51 @@ public class SolarActivity extends AppCompatActivity {
     // LasøØly request CAMERA permission which is required by ARCore.
     DemoUtils.requestCameraPermission(this, RC_PERMISSIONS);
 
-    EditText et_name = findViewById(R.id.et_name);
-    et_name.setOnKeyListener(new View.OnKeyListener() {
-      @Override public boolean onKey(View v, int keyCode, KeyEvent event) {
-        if (KeyEvent.KEYCODE_ENTER == keyCode && KeyEvent.ACTION_DOWN == event.getAction()) {
-          start(et_name.getText().toString());
-          et_name.setText("");
-          InputMethodManager imm =
-              (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-          imm.showSoftInput(et_name, InputMethodManager.SHOW_FORCED);
-
-          imm.hideSoftInputFromWindow(et_name.getWindowToken(), 0);
-          return true;
+    findViewById(R.id.bt_name).setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            buffer.setLength(0);
+            mIatResults.clear();
+            setListenParam();
+            boolean isShowDialog = mSharedPreferences.getBoolean(getString(R.string.pref_key_iat_show), true);
+            if (isShowDialog) {
+                // 显示听写对话框
+                mIatDialog.setListener(mRecognizerDialogListener);
+                mIatDialog.show();
+            }
         }
-        return false;
-      }
     });
       // 初始化合成对象
-      mTts = SpeechSynthesizer.createSynthesizer(this, mTtsInitListener);
+      mTts = SpeechSynthesizer.createSynthesizer(this, mInitTipsListener);
+      // 初始化识别无UI识别对象
+      // 使用SpeechRecognizer对象，可根据回调消息自定义界面；
+      mIat = SpeechRecognizer.createRecognizer(this, mInitListener);
+      // 初始化听写Dialog，如果只使用有UI听写功能，无需创建SpeechRecognizer
+      // 使用UI听写功能，请根据sdk文件目录下的notice.txt,放置布局文件和图片资源
+      mIatDialog = new RecognizerDialog(this, mInitListener);
+      mSharedPreferences = getSharedPreferences(IatSettings.PREFER_NAME, Activity.MODE_PRIVATE);
   }
+
+    private void printResult(RecognizerResult results) {
+        String text = JsonParser.parseIatResult(results.getResultString());
+
+        String sn = null;
+        // 读取json结果中的sn字段
+        try {
+            JSONObject resultJson = new JSONObject(results.getResultString());
+            sn = resultJson.optString("sn");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        mIatResults.put(sn, text);
+
+        StringBuffer resultBuffer = new StringBuffer();
+        for (String key : mIatResults.keySet()) {
+            resultBuffer.append(mIatResults.get(key));
+        }
+        start(resultBuffer.toString());
+    }
 
   private void loadModels() {
     String[] arrays = {
@@ -370,7 +443,6 @@ public class SolarActivity extends AppCompatActivity {
             if (null == point) {
               return;
             }
-
             resume(point, pathFinder.findPoint(goalName));
             arSceneView.getScene().removeOnUpdateListener(this);
           }
@@ -379,6 +451,10 @@ public class SolarActivity extends AppCompatActivity {
   }
 
   private void resume(DogPoint startPoint, DogPoint endPoint) {
+      if (endPoint==null){
+          ToastUtils.showShort("没找到");
+          return;
+      }
     DrawLineHelper drawLineHelper = new DrawLineHelper(this, arSceneView);
     List<DogPoint> dogPointList = pathFinder.findRoutes(startPoint, endPoint);
     if (dogPointList.isEmpty()) {
@@ -440,7 +516,7 @@ public class SolarActivity extends AppCompatActivity {
      */
     private void sayHello(String texts) {
         // 设置参数
-        setParam();
+        setSayParam();
         int code = mTts.startSpeaking(texts, mTtsListener);
 //			/**
 //			 * 只保存音频不进行播放接口,调用此接口请注释startSpeaking接口
@@ -459,7 +535,7 @@ public class SolarActivity extends AppCompatActivity {
      *
      * @return
      */
-    private void setParam() {
+    private void setSayParam() {
         // 清空参数
         mTts.setParameter(SpeechConstant.PARAMS, null);
         // 根据合成引擎设置相应参数
@@ -489,6 +565,67 @@ public class SolarActivity extends AppCompatActivity {
         mTts.setParameter(SpeechConstant.AUDIO_FORMAT, "pcm");
         mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, Environment.getExternalStorageDirectory() + "/msc/tts.pcm");
     }
+
+    /**
+     * 参数设置
+     *
+     * @return
+     */
+    public void setListenParam() {
+        // 清空参数
+        mIat.setParameter(SpeechConstant.PARAMS, null);
+
+        // 设置听写引擎
+        mIat.setParameter(SpeechConstant.ENGINE_TYPE, mEngineType);
+        // 设置返回结果格式
+        mIat.setParameter(SpeechConstant.RESULT_TYPE, resultType);
+
+        this.mTranslateEnable = mSharedPreferences.getBoolean( this.getString(R.string.pref_key_translate), false );
+        if( mTranslateEnable ){
+            mIat.setParameter( SpeechConstant.ASR_SCH, "1" );
+            mIat.setParameter( SpeechConstant.ADD_CAP, "translate" );
+            mIat.setParameter( SpeechConstant.TRS_SRC, "its" );
+        }
+
+        String lag = mSharedPreferences.getString("iat_language_preference",
+                "mandarin");
+        if (lag.equals("en_us")) {
+            // 设置语言
+            mIat.setParameter(SpeechConstant.LANGUAGE, "en_us");
+            mIat.setParameter(SpeechConstant.ACCENT, null);
+
+            if( mTranslateEnable ){
+                mIat.setParameter( SpeechConstant.ORI_LANG, "en" );
+                mIat.setParameter( SpeechConstant.TRANS_LANG, "cn" );
+            }
+        } else {
+            // 设置语言
+            mIat.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
+            // 设置语言区域
+            mIat.setParameter(SpeechConstant.ACCENT, lag);
+
+            if( mTranslateEnable ){
+                mIat.setParameter( SpeechConstant.ORI_LANG, "cn" );
+                mIat.setParameter( SpeechConstant.TRANS_LANG, "en" );
+            }
+        }
+        //此处用于设置dialog中不显示错误码信息
+        //mIat.setParameter("view_tips_plain","false");
+
+        // 设置语音前端点:静音超时时间，即用户多长时间不说话则当做超时处理
+        mIat.setParameter(SpeechConstant.VAD_BOS, mSharedPreferences.getString("iat_vadbos_preference", "4000"));
+
+        // 设置语音后端点:后端点静音检测时间，即用户停止说话多长时间内即认为不再输入， 自动停止录音
+        mIat.setParameter(SpeechConstant.VAD_EOS, mSharedPreferences.getString("iat_vadeos_preference", "1000"));
+
+        // 设置标点符号,设置为"0"返回结果无标点,设置为"1"返回结果有标点
+        mIat.setParameter(SpeechConstant.ASR_PTT, mSharedPreferences.getString("iat_punc_preference", "1"));
+
+        // 设置音频保存路径，保存音频格式支持pcm、wav，设置路径为sd卡请注意WRITE_EXTERNAL_STORAGE权限
+        mIat.setParameter(SpeechConstant.AUDIO_FORMAT,"wav");
+        mIat.setParameter(SpeechConstant.ASR_AUDIO_PATH, Environment.getExternalStorageDirectory()+"/msc/iat.wav");
+    }
+
   private void hideLoadingMessage() {
     if (loadingMessageSnackbar == null) {
       return;
