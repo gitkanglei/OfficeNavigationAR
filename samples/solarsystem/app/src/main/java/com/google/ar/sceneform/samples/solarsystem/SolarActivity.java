@@ -471,7 +471,7 @@ public class SolarActivity extends AppCompatActivity {
       Anchor anchor1 =
           arSceneView.getSession().createAnchor(new Pose(dogPoint.position, dogPoint.rotation));
       boolean isDestination = i == dogPointList.size()-1;
-      createAnchor(anchor1,endPoint.name,isDestination);
+      createAnchor(anchor1,dogPoint.name,isDestination);
       anchors.add(anchor1);
     }
       Log.e("TAG","start line");
