@@ -11,14 +11,30 @@
         android:src="@drawable/teamer_hongchuan"
         android:scaleType="centerCrop"/>
     <TextView
+        android:layout_marginTop="20dp"
         android:id="@+id/tv_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="张洪川"/>
-    <TextView
-        android:id="@+id/tv_describe"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Android开发工程师"/>
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_describe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Android开发工程师"/>
+        <TextView
+            android:layout_marginLeft="10dp"
+            android:id="@+id/tv_yuying"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="语音介绍"/>
+
+    </LinearLayout>
 
 </LinearLayout>

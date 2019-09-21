@@ -20,8 +20,10 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -46,6 +48,7 @@ import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.HitTestResult;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.Scene;
+import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
@@ -55,6 +58,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 /**
  * This is a simple example that shows how to create an augmented reality (AR) application using the
@@ -182,6 +186,12 @@ public class SolarActivity extends AppCompatActivity {
     DemoUtils.requestCameraPermission(this, RC_PERMISSIONS);
   }
 
+
+  private void loadDescrptionView(){
+    View view = LayoutInflater.from(this).inflate(R.layout.view_person,null);
+    ViewGroup container = (ViewGroup) getWindow().getDecorView();
+    container.addView(view);
+  }
   private void loadModels() {
     String[] arrays = {
         "Sol.sfb", "Mercury.sfb", "Venus.sfb",
@@ -348,6 +358,17 @@ public class SolarActivity extends AppCompatActivity {
     no.setLocalScale(new Vector3(0.1f, 0.1f, 0.1f));
     no.setRenderable(earthRenderable);
     no.setParent(anchorNode);
+    ViewRenderable.builder().setView(this, R.layout.view_person).build().thenAccept(new Consumer<ViewRenderable>() {
+      @Override
+      public void accept(ViewRenderable viewRenderable) {
+        viewRenderable.setShadowCaster(false);
+        FaceToCameraNode faceToCameraNode = new FaceToCameraNode();
+        faceToCameraNode.setParent(no);
+        faceToCameraNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0f, 1f, 0f), 90f));
+        faceToCameraNode.setLocalPosition(new Vector3(0f, 0.1f, 0f));
+      }
+    });
+
   }
 
   private boolean tryPlaceSolarSystem(MotionEvent tap, Frame frame) {
