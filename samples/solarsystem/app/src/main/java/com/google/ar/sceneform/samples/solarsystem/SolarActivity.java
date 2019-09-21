@@ -171,7 +171,7 @@ public class SolarActivity extends AppCompatActivity {
               return;
             }
             if (isResumed) {
-              //resume();
+              resume();
               isResumed = false;
             }
           }
