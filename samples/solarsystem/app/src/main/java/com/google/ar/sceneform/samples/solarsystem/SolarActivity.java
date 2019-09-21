@@ -72,6 +72,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
@@ -435,20 +436,21 @@ public class SolarActivity extends AppCompatActivity {
               return;
             }
 
-            if (null == arSceneView.getSession()) {
-              return;
-            }
-            Pose currentPos = frame.getAndroidSensorPose();
-            DogPoint point = pathFinder.findNearestPoint(currentPos);
-            if (null == point) {
-              return;
-            }
-            resume(point, pathFinder.findPoint(goalName));
-            arSceneView.getScene().removeOnUpdateListener(this);
-          }
-        }
-    );
-  }
+                        if (null == arSceneView.getSession()) {
+                            return;
+                        }
+                        Pose currentPos = frame.getAndroidSensorPose();
+                        DogPoint point = pathFinder.findNearestPoint(currentPos);
+                        if (null == point) {
+                            return;
+                        }
+                        String name = goalName.replace("。", "");
+                        resume(point, pathFinder.findPoint(name));
+                        arSceneView.getScene().removeOnUpdateListener(this);
+                    }
+                }
+        );
+    }
 
   private void resume(DogPoint startPoint, DogPoint endPoint) {
       if (endPoint==null){

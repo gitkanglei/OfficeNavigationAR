@@ -58,7 +58,8 @@ class PathFinder {
 
   fun findPoint(name: String): DogPoint? {
    val mapSet= map.entries
-    mapSet.forEach { if (name.contains(it.key)){
+    mapSet.forEach {
+      if (name.contains(it.key)){
       return it.value
     } }
     return null
