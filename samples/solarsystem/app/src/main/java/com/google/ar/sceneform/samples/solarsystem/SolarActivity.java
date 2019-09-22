@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -33,6 +34,7 @@ import com.ardog.models.ModelLoaderManager;
 import com.ardog.utils.DrawLineHelper;
 import com.ardog.utils.FileUtils;
 import com.ardog.utils.PathFinder;
+import com.ardog.utils.PinYinUtils;
 import com.ardog.utils.PointUtil;
 import com.blankj.utilcode.util.ToastUtils;
 import com.google.ar.core.Anchor;
@@ -448,7 +450,7 @@ public class SolarActivity extends AppCompatActivity {
                             return;
                         }
                         String name = goalName.replace("。", "");
-                        resume(point, pathFinder.findPoint(name));
+                        resume(point, pathFinder.findPoint(PinYinUtils.getHanziPinYin(name)));
                         arSceneView.getScene().removeOnUpdateListener(this);
                     }
                 }
@@ -494,7 +496,7 @@ public class SolarActivity extends AppCompatActivity {
     anchorNode.setParent(arSceneView.getScene());
     Node no = new Node();
     no.setLocalScale(new Vector3(0.1f, 0.1f, 0.1f));
-    no.setRenderable(isDestation?senceRenderable:earthRenderable);
+//    no.setRenderable(isDestation?senceRenderable:earthRenderable);
     no.setParent(anchorNode);
     if(no.getParent()!=null){
         no.getParent().removeChild(no);
@@ -514,11 +516,16 @@ public class SolarActivity extends AppCompatActivity {
                         faceToCameraNode.setRenderable(viewRenderable);
                         View view = viewRenderable.getView();
                         TextView tvName = view.findViewById(R.id.tv_name);
-                        tvName.setText(name);
+                        if (!TextUtils.isEmpty(name)){
+                            tvName.setText("今天请假了");
+                        }
                         view.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                sayHello(tvName.getText().toString());
+                                if (TextUtils.isEmpty(name)){
+                                    return;
+                                }
+                                sayHello("张红川");
                             }
                         });
                     }
