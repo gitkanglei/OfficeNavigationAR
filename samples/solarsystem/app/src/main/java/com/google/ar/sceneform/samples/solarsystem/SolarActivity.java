@@ -496,7 +496,7 @@ public class SolarActivity extends AppCompatActivity {
     anchorNode.setParent(arSceneView.getScene());
     Node no = new Node();
     no.setLocalScale(new Vector3(0.1f, 0.1f, 0.1f));
-    no.setRenderable(isDestation?senceRenderable:earthRenderable);
+//    no.setRenderable(isDestation?senceRenderable:earthRenderable);
     no.setParent(anchorNode);
     if(no.getParent()!=null){
         no.getParent().removeChild(no);
@@ -517,7 +517,7 @@ public class SolarActivity extends AppCompatActivity {
                         View view = viewRenderable.getView();
                         TextView tvName = view.findViewById(R.id.tv_name);
                         if (!TextUtils.isEmpty(name)){
-                            tvName.setText("今天请假不在公司");
+                            tvName.setText("今天请假了");
                         }
                         view.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -525,7 +525,7 @@ public class SolarActivity extends AppCompatActivity {
                                 if (TextUtils.isEmpty(name)){
                                     return;
                                 }
-                                sayHello("姓名张红川部门技术部");
+                                sayHello("张红川");
                             }
                         });
                     }
