@@ -60,7 +60,7 @@ class PathFinder {
   fun findPoint(name: String): DogPoint? {
    val mapSet= map.entries
     mapSet.forEach {
-      if (it.key.isNotEmpty() &&name.contains(it.key)){
+      if (it.key.isNotEmpty() && name.contains(PinYinUtils.getHanziPinYin(it.key))){
       return it.value
     } }
     return null

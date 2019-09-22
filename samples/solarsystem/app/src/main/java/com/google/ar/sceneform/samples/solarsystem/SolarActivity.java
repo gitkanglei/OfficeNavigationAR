@@ -34,6 +34,7 @@ import com.ardog.models.ModelLoaderManager;
 import com.ardog.utils.DrawLineHelper;
 import com.ardog.utils.FileUtils;
 import com.ardog.utils.PathFinder;
+import com.ardog.utils.PinYinUtils;
 import com.ardog.utils.PointUtil;
 import com.blankj.utilcode.util.ToastUtils;
 import com.google.ar.core.Anchor;
@@ -449,7 +450,7 @@ public class SolarActivity extends AppCompatActivity {
                             return;
                         }
                         String name = goalName.replace("。", "");
-                        resume(point, pathFinder.findPoint(name));
+                        resume(point, pathFinder.findPoint(PinYinUtils.getHanziPinYin(name)));
                         arSceneView.getScene().removeOnUpdateListener(this);
                     }
                 }
@@ -515,16 +516,16 @@ public class SolarActivity extends AppCompatActivity {
                         faceToCameraNode.setRenderable(viewRenderable);
                         View view = viewRenderable.getView();
                         TextView tvName = view.findViewById(R.id.tv_name);
-                        if (!TextUtils.isEmpty(tvName.getText().toString())){
+                        if (!TextUtils.isEmpty(name)){
                             tvName.setText("今天请假不在公司");
                         }
                         view.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                if (TextUtils.isEmpty(tvName.getText().toString())){
+                                if (TextUtils.isEmpty(name)){
                                     return;
                                 }
-                                sayHello("姓名张红川部分技术部");
+                                sayHello("姓名张红川部门技术部");
                             }
                         });
                     }
